@@ -1,0 +1,51 @@
+{
+    "name": "sable-extension",
+    "displayName": "Sable AI",
+    "description": "AI-powered code assistance for VS Code",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.80.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "sable.askAI",
+                "title": "Sable: Ask AI"
+            },
+            {
+                "command": "sable.openChat",
+                "title": "Sable: Open Chat"
+            }
+        ],
+        "menus": {
+            "editor/context": [
+                {
+                    "command": "sable.askAI",
+                    "when": "editorHasSelection",
+                    "group": "sable@1"
+                },
+                {
+                    "command": "sable.openChat",
+                    "group": "sable@2"
+                }
+            ]
+        }
+    },
+    "scripts": {
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./"
+    },
+    "dependencies": {
+        "node-fetch": "^2.7.0"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.80.0",
+        "@types/node": "^20.14.0",
+        "@types/node-fetch": "^2.6.11",
+        "typescript": "^5.5.0"
+    }
+}

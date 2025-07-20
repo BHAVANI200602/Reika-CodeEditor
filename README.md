@@ -1,4 +1,4 @@
-# Reika – VS AI Assistant
+# Reika – VS Code AI Assistant
 
 Reika is a minimal, blazing-fast AI assistant for VS Code.  
 It uses an local proxy server to generate inline code suggestions, explain code, and insert fixes — all from your selected code.

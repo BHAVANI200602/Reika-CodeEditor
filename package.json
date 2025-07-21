@@ -1,51 +1,52 @@
 {
-    "name": "sable-extension",
-    "displayName": "Sable AI",
-    "description": "AI-powered code assistance for VS Code",
-    "version": "0.0.1",
-    "engines": {
-        "vscode": "^1.80.0"
-    },
-    "categories": [
-        "Other"
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "reika",
+  "displayName": "Reika",
+  "description": "AI-powered code suggestions and chat",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "reika.askAI",
+        "title": "Reika: Ask AI"
+      },
+      {
+        "command": "reika.openChat",
+        "title": "Reika: Open Chat"
+      }
     ],
-    "main": "./out/extension.js",
-    "contributes": {
-        "commands": [
-            {
-                "command": "sable.askAI",
-                "title": "Sable: Ask AI"
-            },
-            {
-                "command": "sable.openChat",
-                "title": "Sable: Open Chat"
-            }
-        ],
-        "menus": {
-            "editor/context": [
-                {
-                    "command": "sable.askAI",
-                    "when": "editorHasSelection",
-                    "group": "sable@1"
-                },
-                {
-                    "command": "sable.openChat",
-                    "group": "sable@2"
-                }
-            ]
+    "menus": {
+      "editor/context": [
+        {
+          "command": "reika.askAI",
+          "when": "editorHasSelection",
+          "group": "navigation"
+        },
+        {
+          "command": "reika.openChat",
+          "group": "navigation"
         }
-    },
-    "scripts": {
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./"
-    },
-    "dependencies": {
-        "node-fetch": "^2.7.0"
-    },
-    "devDependencies": {
-        "@types/vscode": "^1.80.0",
-        "@types/node": "^20.14.0",
-        "@types/node-fetch": "^2.6.11",
-        "typescript": "^5.5.0"
+      ]
     }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.18",
+    "@types/vscode": "^1.74.0",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  }
 }

@@ -46,7 +46,6 @@ let previousEdit = null;
 let cachedWebviewPanel = null;
 let lastPromptId = null;
 function activate(context) {
-    // Register the message handler once at the top level
     const registerWebviewMessageHandler = (panel) => {
         panel.webview.onDidReceiveMessage(async (message) => {
             console.log('[Reika] Received webview message:', message);
@@ -227,7 +226,7 @@ function activate(context) {
         }
         console.log('[Reika] Selected text:', selectedText);
         if (!cachedWebviewPanel) {
-            cachedWebviewPanel = vscode.window.createWebviewPanel('reikaChat', 'Reika Chat', vscode.ViewColumn.Two, { enableScripts: true, retainContextWhenHidden: true });
+            cachedWebviewPanel = vscode.window.createWebviewPanel('reikaChat', 'Reika Chat', vscode.ViewColumn.Two, { enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'src'))] });
             cachedWebviewPanel.onDidDispose(() => {
                 console.log('[Reika] Webview panel disposed');
                 cachedWebviewPanel = null;
@@ -235,8 +234,14 @@ function activate(context) {
                 lastPromptId = null;
             }, null, context.subscriptions);
             const htmlPath = path.join(context.extensionPath, 'src', 'chat.html');
+            const cssPath = vscode.Uri.file(path.join(context.extensionPath, 'src', 'style.css'));
+            const jsPath = vscode.Uri.file(path.join(context.extensionPath, 'src', 'script.js'));
+            const cssUri = cachedWebviewPanel.webview.asWebviewUri(cssPath);
+            const jsUri = cachedWebviewPanel.webview.asWebviewUri(jsPath);
             try {
-                const htmlContent = fs.readFileSync(htmlPath, 'utf-8');
+                let htmlContent = fs.readFileSync(htmlPath, 'utf-8');
+                htmlContent = htmlContent.replace('href="style.css"', `href="${cssUri}"`);
+                htmlContent = htmlContent.replace('src="script.js"', `src="${jsUri}"`);
                 cachedWebviewPanel.webview.html = htmlContent;
                 console.log('[Reika] Webview HTML loaded successfully');
             }
@@ -264,7 +269,7 @@ function activate(context) {
     });
     const chatDisposable = vscode.commands.registerCommand('reika.openChat', async () => {
         if (!cachedWebviewPanel) {
-            cachedWebviewPanel = vscode.window.createWebviewPanel('reikaChat', 'Reika Chat', vscode.ViewColumn.Two, { enableScripts: true, retainContextWhenHidden: true });
+            cachedWebviewPanel = vscode.window.createWebviewPanel('reikaChat', 'Reika Chat', vscode.ViewColumn.Two, { enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'src'))] });
             cachedWebviewPanel.onDidDispose(() => {
                 console.log('[Reika] Webview panel disposed');
                 cachedWebviewPanel = null;
@@ -272,8 +277,14 @@ function activate(context) {
                 lastPromptId = null;
             }, null, context.subscriptions);
             const htmlPath = path.join(context.extensionPath, 'src', 'chat.html');
+            const cssPath = vscode.Uri.file(path.join(context.extensionPath, 'src', 'style.css'));
+            const jsPath = vscode.Uri.file(path.join(context.extensionPath, 'src', 'script.js'));
+            const cssUri = cachedWebviewPanel.webview.asWebviewUri(cssPath);
+            const jsUri = cachedWebviewPanel.webview.asWebviewUri(jsPath);
             try {
-                const htmlContent = fs.readFileSync(htmlPath, 'utf-8');
+                let htmlContent = fs.readFileSync(htmlPath, 'utf-8');
+                htmlContent = htmlContent.replace('href="style.css"', `href="${cssUri}"`);
+                htmlContent = htmlContent.replace('src="script.js"', `src="${jsUri}"`);
                 cachedWebviewPanel.webview.html = htmlContent;
                 console.log('[Reika] Webview HTML loaded successfully');
             }

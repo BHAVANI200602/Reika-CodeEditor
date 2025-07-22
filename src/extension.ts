@@ -24,7 +24,6 @@ interface WebviewMessage {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    // Register the message handler once at the top level
     const registerWebviewMessageHandler = (panel: vscode.WebviewPanel) => {
         panel.webview.onDidReceiveMessage(async (message: WebviewMessage) => {
             console.log('[Reika] Received webview message:', message);
@@ -46,13 +45,15 @@ export function activate(context: vscode.ExtensionContext) {
                         body: JSON.stringify({ prompt: message.text })
                     });
                     console.log('[Reika] Backend response status:', res.status);
+
                     if (!res.ok) {
                         throw new Error(`HTTP error! status: ${res.status}, message: ${await res.text()}`);
                     }
+
                     const data = await res.json();
                     console.log('[Reika] Backend response data:', data);
-                    const reply = data.reply || 'Reika did not respond.';
 
+                    const reply = data.reply || 'Reika did not respond.';
                     let code = '';
                     let explanation = reply;
                     let language: string | null = null;
@@ -68,7 +69,6 @@ export function activate(context: vscode.ExtensionContext) {
                     }
 
                     const isCode = !!code && (language || /^[ \t]*(function|class|const|let|var|#include|def|print|if|else)/.test(code));
-
                     console.log('[Reika] Posting showResponse to webview:', {
                         command: 'showResponse',
                         code: isCode ? code : '',
@@ -120,21 +120,25 @@ export function activate(context: vscode.ExtensionContext) {
                     vscode.window.showErrorMessage('❌ No active text editor to apply changes.');
                     return;
                 }
+
                 if (!previousEdit || !previousEdit.codeText) {
                     console.log('[Reika] No previous edit available for acceptEdit');
                     vscode.window.showErrorMessage('❌ No edit available to apply.');
                     return;
                 }
+
                 if (previousEdit.document.isClosed) {
                     console.log('[Reika] Document is closed for acceptEdit');
                     vscode.window.showErrorMessage('❌ Cannot apply edit: Document is closed.');
                     return;
                 }
+
                 if (previousEdit.document !== currentEditor.document) {
                     console.log('[Reika] Document mismatch in acceptEdit');
                     vscode.window.showErrorMessage('❌ Document mismatch: Please ensure the correct file is open.');
                     return;
                 }
+
                 try {
                     const isValidRange = previousEdit.range.start.isBeforeOrEqual(previousEdit.range.end) &&
                         previousEdit.range.end.line < previousEdit.document.lineCount;
@@ -143,6 +147,7 @@ export function activate(context: vscode.ExtensionContext) {
                         vscode.window.showErrorMessage('❌ Invalid range in document.');
                         return;
                     }
+
                     const edit = new vscode.WorkspaceEdit();
                     edit.replace(previousEdit.document.uri, previousEdit.range, previousEdit.codeText);
                     const success = await vscode.workspace.applyEdit(edit);
@@ -169,11 +174,13 @@ export function activate(context: vscode.ExtensionContext) {
                     vscode.window.showWarningMessage('⚠️ No edit available or editor closed.');
                     return;
                 }
+
                 if (previousEdit.document !== currentEditor.document) {
                     console.log('[Reika] Document mismatch in rejectEdit');
                     vscode.window.showWarningMessage('⚠️ Document mismatch: Please ensure the correct file is open.');
                     return;
                 }
+
                 try {
                     const edit = new vscode.WorkspaceEdit();
                     edit.replace(previousEdit.document.uri, previousEdit.range, previousEdit.originalText);
@@ -218,7 +225,7 @@ export function activate(context: vscode.ExtensionContext) {
                 'reikaChat',
                 'Reika Chat',
                 vscode.ViewColumn.Two,
-                { enableScripts: true, retainContextWhenHidden: true }
+                { enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'src'))] }
             );
 
             cachedWebviewPanel.onDidDispose(() => {
@@ -229,8 +236,15 @@ export function activate(context: vscode.ExtensionContext) {
             }, null, context.subscriptions);
 
             const htmlPath = path.join(context.extensionPath, 'src', 'chat.html');
+            const cssPath = vscode.Uri.file(path.join(context.extensionPath, 'src', 'style.css'));
+            const jsPath = vscode.Uri.file(path.join(context.extensionPath, 'src', 'script.js'));
+            const cssUri = cachedWebviewPanel.webview.asWebviewUri(cssPath);
+            const jsUri = cachedWebviewPanel.webview.asWebviewUri(jsPath);
+
             try {
-                const htmlContent = fs.readFileSync(htmlPath, 'utf-8');
+                let htmlContent = fs.readFileSync(htmlPath, 'utf-8');
+                htmlContent = htmlContent.replace('href="style.css"', `href="${cssUri}"`);
+                htmlContent = htmlContent.replace('src="script.js"', `src="${jsUri}"`);
                 cachedWebviewPanel.webview.html = htmlContent;
                 console.log('[Reika] Webview HTML loaded successfully');
             } catch (error) {
@@ -247,6 +261,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         const promptId = Date.now().toString();
         console.log('[Reika] Sending prompt to webview:', { text: selectedText, promptId });
+
         try {
             await cachedWebviewPanel.webview.postMessage({ command: 'sendPrompt', text: selectedText, promptId });
         } catch (error) {
@@ -262,7 +277,7 @@ export function activate(context: vscode.ExtensionContext) {
                 'reikaChat',
                 'Reika Chat',
                 vscode.ViewColumn.Two,
-                { enableScripts: true, retainContextWhenHidden: true }
+                { enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'src'))] }
             );
 
             cachedWebviewPanel.onDidDispose(() => {
@@ -273,8 +288,15 @@ export function activate(context: vscode.ExtensionContext) {
             }, null, context.subscriptions);
 
             const htmlPath = path.join(context.extensionPath, 'src', 'chat.html');
+            const cssPath = vscode.Uri.file(path.join(context.extensionPath, 'src', 'style.css'));
+            const jsPath = vscode.Uri.file(path.join(context.extensionPath, 'src', 'script.js'));
+            const cssUri = cachedWebviewPanel.webview.asWebviewUri(cssPath);
+            const jsUri = cachedWebviewPanel.webview.asWebviewUri(jsPath);
+
             try {
-                const htmlContent = fs.readFileSync(htmlPath, 'utf-8');
+                let htmlContent = fs.readFileSync(htmlPath, 'utf-8');
+                htmlContent = htmlContent.replace('href="style.css"', `href="${cssUri}"`);
+                htmlContent = htmlContent.replace('src="script.js"', `src="${jsUri}"`);
                 cachedWebviewPanel.webview.html = htmlContent;
                 console.log('[Reika] Webview HTML loaded successfully');
             } catch (error) {
